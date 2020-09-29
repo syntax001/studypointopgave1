@@ -7,7 +7,7 @@ PFont font;
 void setup() {
   size(1001, 1001);
   //hastighed
-  frameRate(10); 
+  frameRate(12); 
   font = loadFont("Serif-16.vlw");
   //størrelse 
   textFont(font, 16);
@@ -41,13 +41,22 @@ void draw() {
       stroke(100, 100, 100); //farve på linjer 
       rect(x*40, y*40, 40, 40); //firkanter størrelse
       fill(255); //hvid riller
-      text("Lives: "+game.playerLife, 25, 25); //Hvor mange liv der er tilbage
+      text("Player 1 Lives: "+game.playerLife, 25, 25);
+      text("Player 2 Lives: "+game.playerLife2, 25, 50);//Hvor mange liv der er tilbage
     }
-    if (game.gameOver()) {
+    if (game.gameOverPlayerOne()) {
+      noLoop();
       textSize(72);
       fill(255);
       stroke(255);
-      text("Game Over", width/2.9, height/2);
+      text("Player 2 (Purple) Wins", width/4.8, height/2);
+    }
+    if (game.gameOverPlayerTwo()) {
+      noLoop();
+      textSize(72);
+      fill(255);
+      stroke(255);
+      text("Player 1 (Blue) Wins", width/4.8, height/2);
     }
   }
 }

@@ -5,10 +5,10 @@ class Game { //<>// //<>// //<>// //<>//
   int numberOfEnemies;
   int numberOfHealth = 100; 
   int playerLife;
+  int playerLife2;
   int[] board[];
   Dot player;
-  Dot player2;
-  //Det skal være array da der skal være mere end en 
+  Dot player2; 
   Dot[] enemies;
   Dot[] health;
 
@@ -24,7 +24,8 @@ class Game { //<>// //<>// //<>// //<>//
     numberOfHealth = nH; 
     enemies = new Dot[nE];
     health = new Dot[nH]; 
-    playerLife=100; 
+    playerLife=100;
+    playerLife2=100;
     board  = new int[gW][gH];
     player = new Dot(0, 1, w-1, h-1);
     player2 = new Dot(0, 5, w-1, h-1);
@@ -54,6 +55,9 @@ class Game { //<>// //<>// //<>// //<>//
   int getPlayerLife() {
     return playerLife;
   }
+  int getPlayer2Life() {
+    return playerLife2;
+  }
 
   void onKeyPressed(char k) {
     keys.onKeyPressed(k);
@@ -64,11 +68,12 @@ class Game { //<>// //<>// //<>// //<>//
 
 
   void update() {
+    gameOverPlayerOne();
+    gameOverPlayerTwo();
     updatePlayer();
-    //updateEnemies();
+    updateEnemies();
     updateHealth();
     checkForCollisions();
-    gameOver();
     clearBoard();
     populateBoard();
   }
@@ -111,8 +116,12 @@ class Game { //<>// //<>// //<>// //<>//
       // andre gange flytte sig random
 
       if (i>=0) {
+        //player 1
         int dX = player.xPos - enemies[i].xPos;
         int dY = player.yPos - enemies[i].yPos;
+        //player 2
+        int fX = player2.xPos - enemies[i].xPos;
+        int fY = player2.yPos - enemies[i].yPos;
         if (dX>0) {
           //spilleren er til højre - så flyt mod højr
           enemies[i].moveRight();
@@ -122,6 +131,18 @@ class Game { //<>// //<>// //<>// //<>//
           //spilleren er til højre - så flyt mod højr
           enemies[i].moveDown();
         } else if (dY<0) {
+          enemies[i].moveUp();
+        }
+        //player 2
+        if (fX>0) {
+          //spilleren er til højre - så flyt mod højr
+          enemies[i].moveRight();
+        } else  if (fX<0) {
+          enemies[i].moveLeft();
+        } else if (fY>0) {
+          //spilleren er til højre - så flyt mod højr
+          enemies[i].moveDown();
+        } else if (fY<0) {
           enemies[i].moveUp();
         }
       }
@@ -142,21 +163,37 @@ class Game { //<>// //<>// //<>// //<>//
   }
 
   void updateHealth() { 
-    //loope igennem alle health
+    //loope through healthnodes
     for (int i=0; i<health.length; i++) {
       if (i>=0) {
-
+        //player1
         int dX = player.xPos - health[i].xPos;
         int dY = player.yPos - health[i].yPos;
+        //player2
+        int fX = player2.xPos - health[i].xPos;
+        int fY = player2.yPos - health[i].yPos;
+
         if (dX<0) {
-          //spilleren er til højre - så flyt mod højre
+          //player moves left, health moves right
           health[i].moveRight();
         } else  if (dX>0) {
           health[i].moveLeft();
         } else if (dY<0) {
-          //spilleren er til højre - så flyt mod højre
+          //player moves right, food moves left
           health[i].moveDown();
         } else if (dY>0) {
+          health[i].moveUp();
+        }
+        //player 2
+        if (fX<0) {
+          //player moves left, health moves right
+          health[i].moveRight();
+        } else  if (fX>0) {
+          health[i].moveLeft();
+        } else if (fY<0) {
+          //player moves right, food moves left
+          health[i].moveDown();
+        } else if (fY>0) {
           health[i].moveUp();
         }
       }
@@ -189,6 +226,16 @@ class Game { //<>// //<>// //<>// //<>//
         }
       }
     }
+
+    for (int i=0; i<enemies.length; i++) {
+      if (enemies[i].getX() == player2.getX() && enemies[i].getY() == player2.getY()) {
+        // then coll and player looses one lifepoint
+        if (playerLife2>0) //fortsætter ikke efter 0
+        {
+          playerLife2--; //falder i liv
+        }
+      }
+    }
     // check for collisions between player and healthnodes
     for (int i=0; i<health.length; i++) {
       if (health[i].getX() == player.getX() && health[i].getY() == player.getY()) {
@@ -203,13 +250,31 @@ class Game { //<>// //<>// //<>// //<>//
         addHealth(health);
       }
     }
+
+    for (int i=0; i<health.length; i++) {
+      if (health[i].getX() == player2.getX() && health[i].getY() == player2.getY()) {
+        // to make sure our player doesnt exceed 100 hitpoints
+        if (playerLife2<100) 
+        {
+          playerLife2++;
+        }
+        // when colliding with healthnodes, remove them 
+        removeHealth(health, i);
+        // and then spawn them back
+        addHealth(health);
+      }
+    }
   }
 
   // checks if our player goes below 0 hitpoints and ends the game
-  boolean gameOver() {
+  boolean gameOverPlayerOne() {
     if (playerLife == 0) {
-      delay(1);
-      noLoop();
+      return(true);
+    }
+    return false;
+  }
+  boolean gameOverPlayerTwo() {
+    if (playerLife2 == 0) {
       return(true);
     }
     return false;
